@@ -1,0 +1,41 @@
+# Build and target
+target/
+build/
+bin/
+out/
+
+# Environment and secrets
+.env
+.env.local
+*.jks
+*.p12
+*.pem
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+.springBeans
+.sts4-cache
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Project specific
+uploads/
+Dataset/
+media/
+temp/
+*.log
+hs_err_pid*
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+/.metadata/
