@@ -21,6 +21,7 @@ public class WebConfig implements WebMvcConfigurer {
         List<String> origins = new ArrayList<>(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:3001",
+                "http://localhost:5173",
                 "https://wehear-frontend.tuongporo9x2004.workers.dev",
                 "https://wehear-frontend.pages.dev"
         ));

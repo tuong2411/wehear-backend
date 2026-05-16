@@ -17,10 +17,23 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil {
 
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    private final SecretKey secretKey;
     
     @Value("${jwt.expiration:86400000}")
     private long jwtExpirationInMs;
+
+    public JwtTokenUtil(@Value("${JWT_SECRET:wehear_default_secret_key_for_dev_purposes_only_2026_long_enough}") String secret) {
+        byte[] keyBytes = secret.getBytes();
+        if (keyBytes.length < 64) {
+            byte[] paddedKey = new byte[64];
+            for (int i = 0; i < 64; i++) {
+                paddedKey[i] = keyBytes[i % keyBytes.length];
+            }
+            this.secretKey = Keys.hmacShaKeyFor(paddedKey);
+        } else {
+            this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        }
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

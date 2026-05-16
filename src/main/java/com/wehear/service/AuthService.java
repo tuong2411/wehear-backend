@@ -6,6 +6,8 @@ import com.wehear.dto.RegisterRequest;
 import com.wehear.model.User;
 import com.wehear.repository.UserRepository;
 import com.wehear.util.JwtTokenUtil;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ public class AuthService {
 
     private final Map<String, ResetTokenInfo> resetTokens = new ConcurrentHashMap<>();
 
+    @Value("${FRONTEND_URL:http://localhost:3000}")
+    private String frontendUrl;
+
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -50,7 +55,7 @@ public class AuthService {
         long expiryTime = System.currentTimeMillis() + (15 * 60 * 1000);
         resetTokens.put(token, new ResetTokenInfo(email, expiryTime));
 
-        String resetLink = "http://localhost:3001/reset-password?token=" + token;
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
         String htmlBody = emailService.getResetPasswordTemplate(resetLink);
         
         emailService.sendHtmlEmail(email, "Đặt lại mật khẩu - Wehear", htmlBody);
