@@ -80,7 +80,8 @@ public class SecurityConfig {
         List<String> allowedOrigins = new ArrayList<>(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:3001",
-                "https://wehear-frontend.tuongporo9x2004.workers.dev"
+                "https://wehear-frontend.tuongporo9x2004.workers.dev",
+                "https://wehear-frontend.pages.dev"
         ));
         if (frontendUrl != null && !frontendUrl.isEmpty()) {
             allowedOrigins.add(frontendUrl);

@@ -21,7 +21,8 @@ public class WebConfig implements WebMvcConfigurer {
         List<String> origins = new ArrayList<>(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:3001",
-                "https://wehear-frontend.tuongporo9x2004.workers.dev"
+                "https://wehear-frontend.tuongporo9x2004.workers.dev",
+                "https://wehear-frontend.pages.dev"
         ));
         if (frontendUrl != null && !frontendUrl.isEmpty()) {
             origins.add(frontendUrl);
