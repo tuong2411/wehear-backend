@@ -1,33 +1,42 @@
 package com.wehear.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    @Value("${FRONTEND_URL:http://localhost:3000}")
+    private String frontendUrl;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        List<String> origins = new ArrayList<>(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "https://wehear-frontend.tuongporo9x2004.workers.dev"
+        ));
+        if (frontendUrl != null && !frontendUrl.isEmpty()) {
+            origins.add(frontendUrl);
+        }
+        String[] allowedOrigins = origins.toArray(new String[0]);
+
         // Cho phép Frontend truy cập API
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:3001")
+                .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
 
-        // Cho phép truy cập tài nguyên media (video) - Đã chuyển sang Cloudinary nên có thể tắt
-        /*
-        registry.addMapping("/media/dataset/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:3001")
-                .allowedMethods("GET", "OPTIONS")
-                .allowedHeaders("*");
-        */
-
         registry.addMapping("/uploads/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:3001")
+                .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "OPTIONS")
                 .allowedHeaders("*");
     }
