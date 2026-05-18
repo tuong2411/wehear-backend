@@ -1,32 +1,46 @@
 package com.wehear.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private static final String RESEND_EMAILS_URL = "https://api.resend.com/emails";
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    private final RestTemplate restTemplate;
+
+    @Value("${resend.api.key}")
+    private String resendApiKey;
+
+    @Value("${resend.from.email}")
+    private String fromEmail;
+
+    public EmailService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
     public void sendHtmlEmail(String to, String subject, String htmlBody) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            
-            helper.setFrom("wehear.support@gmail.com");
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true);
-            
-            mailSender.send(message);
-        } catch (MessagingException e) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(resendApiKey);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> payload = Map.of(
+                    "from", fromEmail,
+                    "to", new String[] { to },
+                    "subject", subject,
+                    "html", htmlBody
+            );
+
+            restTemplate.postForEntity(RESEND_EMAILS_URL, new HttpEntity<>(payload, headers), String.class);
+        } catch (Exception e) {
             throw new RuntimeException("Failed to send email", e);
         }
     }
