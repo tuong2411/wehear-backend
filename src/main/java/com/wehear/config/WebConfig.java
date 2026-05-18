@@ -13,7 +13,7 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Value("${FRONTEND_URL:http://localhost:3000}")
+    @Value("${FRONTEND_URL:http://localhost:3001}")
     private String frontendUrl;
 
     @Override
@@ -22,6 +22,8 @@ public class WebConfig implements WebMvcConfigurer {
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "http://localhost:5173",
+                "https://www.wehear.today",
+                "https://wehear.today",
                 "https://wehear-frontend.tuongporo9x2004.workers.dev",
                 "https://wehear-frontend.pages.dev"
         ));

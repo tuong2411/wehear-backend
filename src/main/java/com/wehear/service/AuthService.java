@@ -36,7 +36,7 @@ public class AuthService {
 
     private final Map<String, ResetTokenInfo> resetTokens = new ConcurrentHashMap<>();
 
-    @Value("${FRONTEND_URL:http://localhost:3000}")
+    @Value("${FRONTEND_URL:http://localhost:3001}")
     private String frontendUrl;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil, EmailService emailService) {

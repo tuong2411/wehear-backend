@@ -18,6 +18,7 @@ import com.wehear.util.SlugUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.HttpURLConnection;
@@ -36,6 +37,9 @@ public class ExternalNewsFetchService {
     private final ExternalNewsRepository externalNewsRepository;
     private final EmailService emailService;
     private final UserRepository userRepository;
+
+    @Value("${FRONTEND_URL:http://localhost:3001}")
+    private String frontendUrl;
 
     public ExternalNewsFetchService(
             NewsSourceRepository newsSourceRepository,
@@ -142,7 +146,7 @@ public class ExternalNewsFetchService {
     private void sendNewsNotificationToAllUsers(ExternalNewsArticle article) {
         try {
             List<com.wehear.model.User> users = userRepository.findAll();
-            String frontendUrl = "http://localhost:3001/news/" + article.getSlug();
+            String articleFrontendUrl = frontendUrl + "/news/" + article.getSlug();
             
             for (com.wehear.model.User user : users) {
                 if (user.getEmail() != null && !user.getEmail().isEmpty()) {
@@ -150,7 +154,7 @@ public class ExternalNewsFetchService {
                         user.getFullName(), 
                         article.getTitle(), 
                         article.getSummary(), 
-                        frontendUrl
+                        articleFrontendUrl
                     );
                     emailService.sendHtmlEmail(user.getEmail(), "Tin tức mới: " + article.getTitle() + " - Wehear", html);
                 }

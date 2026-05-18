@@ -22,6 +22,9 @@ public class EmailService {
     @Value("${resend.from.email}")
     private String fromEmail;
 
+    @Value("${FRONTEND_URL:http://localhost:3001}")
+    private String frontendUrl;
+
     public EmailService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -55,7 +58,7 @@ public class EmailService {
                "    <p>Chúc mừng bạn đã đăng ký tài khoản thành công tại <strong>Wehear - Cầu nối ngôn ngữ ký hiệu Việt Nam</strong>.</p>" +
                "    <p>Chúng tôi rất vui mừng được đồng hành cùng bạn trong hành trình xóa bỏ rào cản ngôn ngữ và kết nối cộng đồng.</p>" +
                "    <div style=\"text-align: center; margin: 40px 0;\">" +
-               "      <a href=\"http://localhost:3001\" style=\"background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Bắt đầu khám phá ngay</a>" +
+               "      <a href=\"" + frontendUrl + "\" style=\"background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Bắt đầu khám phá ngay</a>" +
                "    </div>" +
                "    <p style=\"font-size: 14px; color: #64748b;\">Nếu bạn không thực hiện đăng ký này, vui lòng bỏ qua email hoặc liên hệ với bộ phận hỗ trợ của chúng tôi.</p>" +
                "  </div>" +
@@ -95,7 +98,7 @@ public class EmailService {
                "    <p>Chúng tôi rất vui mừng thông báo rằng đóng góp của bạn cho từ: <strong>\"" + word + "\"</strong> đã được ban quản trị chấp nhận và cập nhật vào hệ thống.</p>" +
                "    <p>Cảm ơn bạn đã chung tay xây dựng cộng đồng Wehear ngày càng phát triển. Những đóng góp của bạn là vô cùng quý giá đối với cộng đồng người khiếm thính.</p>" +
                "    <div style=\"text-align: center; margin: 40px 0;\">" +
-               "      <a href=\"http://localhost:3001/dictionary\" style=\"background-color: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Xem từ điển ngay</a>" +
+               "      <a href=\"" + frontendUrl + "/dictionary\" style=\"background-color: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Xem từ điển ngay</a>" +
                "    </div>" +
                "  </div>" +
                "  <div style=\"background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;\">" +

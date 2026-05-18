@@ -35,7 +35,8 @@ public class SignMedia {
 
     public String getMediaUrl() { 
         if (mediaUrl != null && !mediaUrl.startsWith("http")) {
-            return "http://localhost:8668" + (mediaUrl.startsWith("/") ? "" : "/") + mediaUrl;
+            String backendUrl = System.getenv().getOrDefault("BACKEND_URL", "http://localhost:8668");
+            return backendUrl + (mediaUrl.startsWith("/") ? "" : "/") + mediaUrl;
         }
         return mediaUrl; 
     }

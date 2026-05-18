@@ -3,6 +3,7 @@ package com.wehear.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -23,7 +24,7 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${FRONTEND_URL:http://localhost:3000}")
+    @Value("${FRONTEND_URL:http://localhost:3001}")
     private String frontendUrl;
 
     private final JwtRequestFilter jwtRequestFilter;
@@ -55,10 +56,12 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/dictionary/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/dictionary/**").permitAll()
+                .requestMatchers("/api/dictionary/**").hasRole("ADMIN")
                 .requestMatchers("/api/contributions/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/contributions", "/api/contributions/**").authenticated()
-                .requestMatchers("/api/lessons/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/lessons/**").authenticated()
+                .requestMatchers("/api/lessons/**").hasRole("ADMIN")
                 .requestMatchers("/api/lectures/**").authenticated()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/news/**").permitAll()
@@ -81,6 +84,8 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:3001",
                 "http://localhost:5173",
+                "https://www.wehear.today",
+                "https://wehear.today",
                 "https://wehear-frontend.tuongporo9x2004.workers.dev",
                 "https://wehear-frontend.pages.dev"
         ));
