@@ -24,7 +24,7 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${FRONTEND_URL:http://localhost:3001}")
+    @Value("${FRONTEND_URL:https://wehear.today}")
     private String frontendUrl;
 
     private final JwtRequestFilter jwtRequestFilter;

@@ -13,6 +13,8 @@ import org.springframework.web.client.RestTemplate;
 public class EmailService {
 
     private static final String RESEND_EMAILS_URL = "https://api.resend.com/emails";
+    private static final String BRAND_NAME = "WeHear";
+    private static final String BRAND_TAGLINE = "Cầu nối ngôn ngữ ký hiệu Việt Nam";
 
     private final RestTemplate restTemplate;
 
@@ -22,7 +24,7 @@ public class EmailService {
     @Value("${resend.from.email}")
     private String fromEmail;
 
-    @Value("${FRONTEND_URL:http://localhost:3001}")
+    @Value("${FRONTEND_URL:https://wehear.today}")
     private String frontendUrl;
 
     public EmailService(RestTemplate restTemplate) {
@@ -44,110 +46,112 @@ public class EmailService {
 
             restTemplate.postForEntity(RESEND_EMAILS_URL, new HttpEntity<>(payload, headers), String.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to send email", e);
+            throw new RuntimeException("Không thể gửi email từ WeHear", e);
         }
     }
 
     public String getWelcomeTemplate(String fullName) {
-        return "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;\">" +
-               "  <div style=\"background-color: #2563eb; padding: 30px; text-align: center;\">" +
-               "    <h1 style=\"color: white; margin: 0; font-size: 28px;\">Chào mừng bạn đến với Wehear!</h1>" +
-               "  </div>" +
-               "  <div style=\"padding: 30px; color: #1e293b; line-height: 1.6;\">" +
-               "    <p style=\"font-size: 18px;\">Xin chào <strong>" + fullName + "</strong>,</p>" +
-               "    <p>Chúc mừng bạn đã đăng ký tài khoản thành công tại <strong>Wehear - Cầu nối ngôn ngữ ký hiệu Việt Nam</strong>.</p>" +
-               "    <p>Chúng tôi rất vui mừng được đồng hành cùng bạn trong hành trình xóa bỏ rào cản ngôn ngữ và kết nối cộng đồng.</p>" +
-               "    <div style=\"text-align: center; margin: 40px 0;\">" +
-               "      <a href=\"" + frontendUrl + "\" style=\"background-color: #2563eb; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Bắt đầu khám phá ngay</a>" +
-               "    </div>" +
-               "    <p style=\"font-size: 14px; color: #64748b;\">Nếu bạn không thực hiện đăng ký này, vui lòng bỏ qua email hoặc liên hệ với bộ phận hỗ trợ của chúng tôi.</p>" +
-               "  </div>" +
-               "  <div style=\"background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;\">" +
-               "    &copy; 2026 Wehear Project. All rights reserved." +
-               "  </div>" +
-               "</div>";
+        return shell(
+                "Chào mừng bạn đến với WeHear",
+                "#2563eb",
+                "<p style=\"font-size: 18px;\">Xin chào <strong>" + escape(fullName) + "</strong>,</p>" +
+                "<p>Tài khoản WeHear của bạn đã được tạo thành công. Từ hôm nay, bạn có thể bắt đầu học, tra cứu và kết nối với cộng đồng ngôn ngữ ký hiệu Việt Nam.</p>" +
+                "<p>WeHear rất vui được đồng hành cùng bạn trên hành trình giao tiếp dễ tiếp cận và gần gũi hơn.</p>" +
+                button(frontendUrl, "Khám phá WeHear", "#2563eb") +
+                "<p style=\"font-size: 14px; color: #64748b;\">Nếu bạn không thực hiện đăng ký này, vui lòng bỏ qua email hoặc liên hệ bộ phận hỗ trợ của WeHear.</p>"
+        );
     }
 
     public String getResetPasswordTemplate(String resetLink) {
-        return "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;\">" +
-               "  <div style=\"background-color: #2563eb; padding: 30px; text-align: center;\">" +
-               "    <h1 style=\"color: white; margin: 0; font-size: 28px;\">Đặt lại mật khẩu</h1>" +
-               "  </div>" +
-               "  <div style=\"padding: 30px; color: #1e293b; line-height: 1.6;\">" +
-               "    <p style=\"font-size: 18px;\">Xin chào,</p>" +
-               "    <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản Wehear của bạn.</p>" +
-               "    <p>Vui lòng nhấn vào nút bên dưới để tiến hành thay đổi mật khẩu. Link này sẽ <strong>hết hạn trong 15 phút</strong>.</p>" +
-               "    <div style=\"text-align: center; margin: 40px 0;\">" +
-               "      <a href=\"" + resetLink + "\" style=\"background-color: #ef4444; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Đặt lại mật khẩu ngay</a>" +
-               "    </div>" +
-               "    <p style=\"font-size: 14px; color: #64748b;\">Nếu bạn không yêu cầu đổi mật khẩu, bạn có thể yên tâm bỏ qua email này. Mật khẩu của bạn vẫn an toàn.</p>" +
-               "  </div>" +
-               "  <div style=\"background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;\">" +
-               "    &copy; 2026 Wehear Project. All rights reserved." +
-               "  </div>" +
-               "</div>";
+        return shell(
+                "Đặt lại mật khẩu WeHear",
+                "#ef4444",
+                "<p style=\"font-size: 18px;\">Xin chào,</p>" +
+                "<p>WeHear nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>" +
+                "<p>Vui lòng nhấn nút bên dưới để tạo mật khẩu mới. Liên kết này sẽ hết hạn sau <strong>15 phút</strong>.</p>" +
+                button(resetLink, "Đặt lại mật khẩu", "#ef4444") +
+                "<p style=\"font-size: 14px; color: #64748b;\">Nếu bạn không yêu cầu thao tác này, bạn có thể bỏ qua email. Mật khẩu hiện tại của bạn vẫn được giữ nguyên.</p>"
+        );
     }
 
     public String getContributionApprovalTemplate(String fullName, String word) {
-        return "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;\">" +
-               "  <div style=\"background-color: #10b981; padding: 30px; text-align: center;\">" +
-               "    <h1 style=\"color: white; margin: 0; font-size: 28px;\">Đóng góp của bạn đã được duyệt!</h1>" +
-               "  </div>" +
-               "  <div style=\"padding: 30px; color: #1e293b; line-height: 1.6;\">" +
-               "    <p style=\"font-size: 18px;\">Xin chào <strong>" + fullName + "</strong>,</p>" +
-               "    <p>Chúng tôi rất vui mừng thông báo rằng đóng góp của bạn cho từ: <strong>\"" + word + "\"</strong> đã được ban quản trị chấp nhận và cập nhật vào hệ thống.</p>" +
-               "    <p>Cảm ơn bạn đã chung tay xây dựng cộng đồng Wehear ngày càng phát triển. Những đóng góp của bạn là vô cùng quý giá đối với cộng đồng người khiếm thính.</p>" +
-               "    <div style=\"text-align: center; margin: 40px 0;\">" +
-               "      <a href=\"" + frontendUrl + "/dictionary\" style=\"background-color: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">Xem từ điển ngay</a>" +
-               "    </div>" +
-               "  </div>" +
-               "  <div style=\"background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;\">" +
-               "    &copy; 2026 Wehear Project. All rights reserved." +
-               "  </div>" +
-               "</div>";
+        return shell(
+                "Đóng góp của bạn đã được duyệt",
+                "#10b981",
+                "<p style=\"font-size: 18px;\">Xin chào <strong>" + escape(fullName) + "</strong>,</p>" +
+                "<p>WeHear đã duyệt đóng góp của bạn cho từ <strong>\"" + escape(word) + "\"</strong> và cập nhật vào hệ thống.</p>" +
+                "<p>Cảm ơn bạn đã cùng xây dựng kho tri thức ngôn ngữ ký hiệu Việt Nam ngày càng phong phú và hữu ích hơn.</p>" +
+                button(frontendUrl + "/dictionary", "Xem từ điển WeHear", "#10b981")
+        );
     }
 
     public String getContributionRejectionTemplate(String fullName, String word, String reason) {
+        String displayReason = reason != null && !reason.isBlank()
+                ? escape(reason)
+                : "WeHear chưa có ghi chú cụ thể cho lần từ chối này.";
+
+        return shell(
+                "Cập nhật về đóng góp của bạn",
+                "#ef4444",
+                "<p style=\"font-size: 18px;\">Xin chào <strong>" + escape(fullName) + "</strong>,</p>" +
+                "<p>WeHear đã xem xét đóng góp của bạn cho từ <strong>\"" + escape(word) + "\"</strong>.</p>" +
+                "<p>Rất tiếc, đóng góp này hiện chưa thể được duyệt.</p>" +
+                "<div style=\"background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;\">" +
+                "  <p style=\"margin: 0; font-weight: bold; color: #991b1b;\">Lý do:</p>" +
+                "  <p style=\"margin: 5px 0 0 0; color: #b91c1c;\">" + displayReason + "</p>" +
+                "</div>" +
+                "<p>Bạn có thể điều chỉnh nội dung và gửi lại khi sẵn sàng. WeHear luôn trân trọng sự đóng góp của bạn.</p>"
+        );
+    }
+
+    public String getNewNewsNotificationTemplate(String fullName, String articleTitle, String articleSummary, String articleUrl) {
+        return shell(
+                "Tin mới từ WeHear",
+                "#2563eb",
+                "<p style=\"font-size: 18px;\">Xin chào <strong>" + escape(fullName) + "</strong>,</p>" +
+                "<p>WeHear vừa cập nhật một bài viết mới có thể bạn sẽ quan tâm:</p>" +
+                "<div style=\"background-color: #f1f5f9; padding: 20px; border-radius: 12px; margin: 20px 0;\">" +
+                "  <h2 style=\"margin-top: 0; color: #1e293b; font-size: 20px;\">" + escape(articleTitle) + "</h2>" +
+                "  <p style=\"color: #475569; font-size: 14px;\">" + escape(articleSummary) + "</p>" +
+                "  <div style=\"text-align: right; margin-top: 15px;\">" +
+                "    <a href=\"" + escapeAttribute(articleUrl) + "\" style=\"color: #2563eb; font-weight: bold; text-decoration: none;\">Đọc trên WeHear &rarr;</a>" +
+                "  </div>" +
+                "</div>" +
+                "<p style=\"font-size: 14px; color: #64748b;\">Cảm ơn bạn đã theo dõi WeHear.</p>"
+        );
+    }
+
+    private String shell(String title, String color, String body) {
         return "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;\">" +
-               "  <div style=\"background-color: #ef4444; padding: 30px; text-align: center;\">" +
-               "    <h1 style=\"color: white; margin: 0; font-size: 28px;\">Thông báo về đóng góp của bạn</h1>" +
+               "  <div style=\"background-color: " + color + "; padding: 30px; text-align: center;\">" +
+               "    <h1 style=\"color: white; margin: 0; font-size: 26px;\">" + title + "</h1>" +
+               "    <p style=\"color: rgba(255,255,255,0.86); margin: 10px 0 0; font-size: 14px;\">" + BRAND_TAGLINE + "</p>" +
                "  </div>" +
-               "  <div style=\"padding: 30px; color: #1e293b; line-height: 1.6;\">" +
-               "    <p style=\"font-size: 18px;\">Xin chào <strong>" + fullName + "</strong>,</p>" +
-               "    <p>Chúng tôi đã xem xét đóng góp của bạn cho từ: <strong>\"" + word + "\"</strong>.</p>" +
-               "    <p>Rất tiếc, chúng tôi chưa thể chấp nhận đóng góp này vào lúc này.</p>" +
-               "    <div style=\"background-color: #fee2e2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0;\">" +
-               "      <p style=\"margin: 0; font-weight: bold; color: #991b1b;\">Lý do từ chối:</p>" +
-               "      <p style=\"margin: 5px 0 0 0; color: #b91c1c;\">" + (reason != null && !reason.isEmpty() ? reason : "Không có lý do cụ thể được cung cấp.") + "</p>" +
-               "    </div>" +
-               "    <p>Bạn có thể điều chỉnh lại đóng góp của mình và gửi lại cho chúng tôi. Chúng tôi luôn trân trọng sự nhiệt tình của bạn.</p>" +
-               "  </div>" +
+               "  <div style=\"padding: 30px; color: #1e293b; line-height: 1.6;\">" + body + "</div>" +
                "  <div style=\"background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;\">" +
-               "    &copy; 2026 Wehear Project. All rights reserved." +
+               "    &copy; 2026 " + BRAND_NAME + ". All rights reserved." +
                "  </div>" +
                "</div>";
     }
 
-    public String getNewNewsNotificationTemplate(String fullName, String articleTitle, String articleSummary, String articleUrl) {
-        return "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;\">" +
-               "  <div style=\"background-color: #2563eb; padding: 30px; text-align: center;\">" +
-               "    <h1 style=\"color: white; margin: 0; font-size: 24px;\">Tin tức mới từ Wehear</h1>" +
-               "  </div>" +
-               "  <div style=\"padding: 30px; color: #1e293b; line-height: 1.6;\">" +
-               "    <p style=\"font-size: 18px;\">Xin chào <strong>" + fullName + "</strong>,</p>" +
-               "    <p>Chúng tôi vừa cập nhật một tin tức mới có thể bạn sẽ quan tâm:</p>" +
-               "    <div style=\"background-color: #f1f5f9; padding: 20px; border-radius: 12px; margin: 20px 0;\">" +
-               "      <h2 style=\"margin-top: 0; color: #1e293b; font-size: 20px;\">" + articleTitle + "</h2>" +
-               "      <p style=\"color: #475569; font-size: 14px;\">" + articleSummary + "</p>" +
-               "      <div style=\"text-align: right; margin-top: 15px;\">" +
-               "        <a href=\"" + articleUrl + "\" style=\"color: #2563eb; font-weight: bold; text-decoration: none;\">Đọc tiếp &rarr;</a>" +
-               "      </div>" +
-               "    </div>" +
-               "    <p style=\"font-size: 14px; color: #64748b;\">Chúc bạn một ngày tốt lành!</p>" +
-               "  </div>" +
-               "  <div style=\"background-color: #f8fafc; padding: 20px; text-align: center; color: #94a3b8; font-size: 12px;\">" +
-               "    &copy; 2026 Wehear Project. All rights reserved." +
-               "  </div>" +
+    private String button(String href, String label, String color) {
+        return "<div style=\"text-align: center; margin: 40px 0;\">" +
+               "  <a href=\"" + escapeAttribute(href) + "\" style=\"background-color: " + color + "; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;\">" + label + "</a>" +
                "</div>";
+    }
+
+    private String escape(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;");
+    }
+
+    private String escapeAttribute(String value) {
+        return escape(value).replace("'", "&#39;");
     }
 }

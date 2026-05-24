@@ -36,7 +36,7 @@ public class AuthService {
 
     private final Map<String, ResetTokenInfo> resetTokens = new ConcurrentHashMap<>();
 
-    @Value("${FRONTEND_URL:http://localhost:3001}")
+    @Value("${FRONTEND_URL:https://wehear.today}")
     private String frontendUrl;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil, EmailService emailService) {
@@ -58,7 +58,7 @@ public class AuthService {
         String resetLink = frontendUrl + "/reset-password?token=" + token;
         String htmlBody = emailService.getResetPasswordTemplate(resetLink);
         
-        emailService.sendHtmlEmail(email, "Đặt lại mật khẩu - Wehear", htmlBody);
+        emailService.sendHtmlEmail(email, "Đặt lại mật khẩu - WeHear", htmlBody);
     }
 
     public void resetPassword(String token, String newPassword) {
@@ -83,6 +83,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Tên đăng nhập hoặc mật khẩu không đúng");
+        }
+
+        if (user.getStatus() == null || user.getStatus() != 1) {
+            throw new BadCredentialsException("Tài khoản đã bị khóa");
         }
 
         String token = jwtTokenUtil.generateToken(user);
@@ -112,7 +116,7 @@ public class AuthService {
         // Send Welcome Email
         try {
             String htmlBody = emailService.getWelcomeTemplate(user.getFullName());
-            emailService.sendHtmlEmail(user.getEmail(), "Chào mừng bạn đến với Wehear!", htmlBody);
+            emailService.sendHtmlEmail(user.getEmail(), "Chào mừng bạn đến với WeHear", htmlBody);
         } catch (Exception e) {
             // Log error but don't fail registration
             System.err.println("Failed to send welcome email: " + e.getMessage());

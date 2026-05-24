@@ -55,8 +55,13 @@ public class UserRepository {
     }
 
     public void updateStatus(Long userId, Integer status) {
-        String sql = "UPDATE users SET status = ? WHERE id = ?";
+        String sql = "UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         jdbcTemplate.update(sql, status, userId);
+    }
+
+    public void updateRole(Long userId, Long roleId) {
+        String sql = "UPDATE users SET role_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        jdbcTemplate.update(sql, roleId, userId);
     }
 
     public void deleteById(Long userId) {

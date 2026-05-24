@@ -1,7 +1,8 @@
 package com.wehear.config;
 
+import com.wehear.model.User;
+import com.wehear.repository.UserRepository;
 import com.wehear.util.JwtTokenUtil;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,9 +22,11 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
+    private final UserRepository userRepository;
 
-    public JwtRequestFilter(JwtTokenUtil jwtTokenUtil) {
+    public JwtRequestFilter(JwtTokenUtil jwtTokenUtil, UserRepository userRepository) {
         this.jwtTokenUtil = jwtTokenUtil;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -46,6 +49,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
+                User user = userRepository.findByUsername(username).orElse(null);
+                if (user == null || user.getStatus() == null || user.getStatus() != 1) {
+                    chain.doFilter(request, response);
+                    return;
+                }
+
                 // Extract role from token
                 String role = jwtTokenUtil.extractClaim(jwt, claims -> claims.get("role", String.class));
                 

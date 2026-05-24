@@ -149,7 +149,7 @@ public class DictionaryContributionService {
         // Gửi email thông báo
         userRepository.findById(contribution.getUserId()).ifPresent(user -> {
             String html = emailService.getContributionApprovalTemplate(user.getFullName(), contribution.getWord());
-            emailService.sendHtmlEmail(user.getEmail(), "Đóng góp của bạn đã được duyệt - Wehear", html);
+            emailService.sendHtmlEmail(user.getEmail(), "Đóng góp của bạn đã được duyệt - WeHear", html);
         });
     }
 
@@ -166,7 +166,7 @@ public class DictionaryContributionService {
         // Gửi email thông báo
         userRepository.findById(contribution.getUserId()).ifPresent(user -> {
             String html = emailService.getContributionRejectionTemplate(user.getFullName(), contribution.getWord(), adminNote);
-            emailService.sendHtmlEmail(user.getEmail(), "Thông báo về đóng góp của bạn - Wehear", html);
+            emailService.sendHtmlEmail(user.getEmail(), "Cập nhật về đóng góp của bạn - WeHear", html);
         });
     }
 }

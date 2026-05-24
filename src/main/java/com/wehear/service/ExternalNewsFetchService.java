@@ -38,7 +38,7 @@ public class ExternalNewsFetchService {
     private final EmailService emailService;
     private final UserRepository userRepository;
 
-    @Value("${FRONTEND_URL:http://localhost:3001}")
+    @Value("${FRONTEND_URL:https://wehear.today}")
     private String frontendUrl;
 
     public ExternalNewsFetchService(
@@ -156,7 +156,7 @@ public class ExternalNewsFetchService {
                         article.getSummary(), 
                         articleFrontendUrl
                     );
-                    emailService.sendHtmlEmail(user.getEmail(), "Tin tức mới: " + article.getTitle() + " - Wehear", html);
+                    emailService.sendHtmlEmail(user.getEmail(), "Tin mới từ WeHear: " + article.getTitle(), html);
                 }
             }
         } catch (Exception e) {
