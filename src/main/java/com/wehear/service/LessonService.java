@@ -41,6 +41,14 @@ public class LessonService {
         return lessonRepository.findAll();
     }
 
+    public List<Lesson> getAllLessonsWithQuiz() {
+        List<Lesson> lessons = lessonRepository.findAll();
+        for (Lesson lesson : lessons) {
+            loadLessonQuiz(lesson);
+        }
+        return lessons;
+    }
+
     public List<Lesson> getPublishedLessons() {
         return lessonRepository.findPublished();
     }

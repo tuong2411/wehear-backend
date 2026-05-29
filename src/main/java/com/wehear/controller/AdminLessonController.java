@@ -41,7 +41,7 @@ public class AdminLessonController {
 
     @GetMapping
     public ResponseEntity<List<Lesson>> getAllLessons() {
-        return ResponseEntity.ok(lessonService.getAllLessons());
+        return ResponseEntity.ok(lessonService.getAllLessonsWithQuiz());
     }
 
     @GetMapping("/{id}")
