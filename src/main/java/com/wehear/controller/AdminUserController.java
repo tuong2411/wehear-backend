@@ -33,10 +33,10 @@ public class AdminUserController {
     @PostMapping
     public ResponseEntity<String> createUser(@RequestBody RegisterRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Username already exists");
+            return ResponseEntity.badRequest().body("Tên đăng nhập đã tồn tại");
         }
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Email already exists");
+            return ResponseEntity.badRequest().body("Email đã tồn tại");
         }
 
         User user = User.builder()
@@ -50,7 +50,7 @@ public class AdminUserController {
                 .build();
 
         userRepository.save(user);
-        return ResponseEntity.ok("User created successfully");
+        return ResponseEntity.ok("Tạo người dùng thành công");
     }
 
     @PutMapping("/{id}/status")
@@ -60,7 +60,7 @@ public class AdminUserController {
         }
 
         userRepository.updateStatus(id, status);
-        return ResponseEntity.ok("User status updated successfully");
+        return ResponseEntity.ok("Cập nhật trạng thái người dùng thành công");
     }
 
     @PutMapping("/{id}/role")
@@ -71,23 +71,23 @@ public class AdminUserController {
 
         Long roleId = body.get("roleId");
         if (roleId == null || (roleId != 1L && roleId != 2L)) {
-            return ResponseEntity.badRequest().body("Invalid role");
+            return ResponseEntity.badRequest().body("Vai trò không hợp lệ");
         }
 
         userRepository.updateRole(id, roleId);
-        return ResponseEntity.ok("User role updated successfully");
+        return ResponseEntity.ok("Cập nhật vai trò người dùng thành công");
     }
 
     @PostMapping("/{id}/reset-password")
     public ResponseEntity<String> resetPassword(@PathVariable Long id) {
         userRepository.updatePassword(id, passwordEncoder.encode("123456"));
-        return ResponseEntity.ok("Password reset successfully");
+        return ResponseEntity.ok("Đặt lại mật khẩu thành công");
     }
 
     @PostMapping("/bulk-action")
     public ResponseEntity<String> bulkAction(@RequestBody BulkActionRequest request) {
         if (request.getIds() == null || request.getIds().isEmpty()) {
-            return ResponseEntity.badRequest().body("No users selected");
+            return ResponseEntity.badRequest().body("Chưa chọn người dùng");
         }
 
         Long currentUserId = getCurrentUserId();
@@ -109,14 +109,14 @@ public class AdminUserController {
                     userRepository.updateStatus(id, 1);
                     break;
                 case "delete":
-                    userRepository.deleteById(id);
+                    softDeleteUser(id);
                     break;
                 default:
-                    return ResponseEntity.badRequest().body("Invalid action");
+                    return ResponseEntity.badRequest().body("Thao tác không hợp lệ");
             }
         }
 
-        return ResponseEntity.ok("Bulk action completed successfully");
+        return ResponseEntity.ok("Thao tác hàng loạt đã hoàn tất");
     }
 
     @DeleteMapping("/{id}")
@@ -125,8 +125,13 @@ public class AdminUserController {
             return ResponseEntity.badRequest().body("Không thể tự xóa tài khoản của chính mình");
         }
 
-        userRepository.deleteById(id);
-        return ResponseEntity.ok("User deleted successfully");
+        softDeleteUser(id);
+        return ResponseEntity.ok("Người dùng đã được vô hiệu hóa và ẩn thông tin cá nhân");
+    }
+
+    private void softDeleteUser(Long id) {
+        String encodedPassword = passwordEncoder.encode("DELETED_USER_" + id + "_" + System.currentTimeMillis());
+        userRepository.softDeleteById(id, encodedPassword);
     }
 
     private boolean isCurrentUser(Long id) {

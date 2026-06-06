@@ -37,6 +37,11 @@ public class SignMediaRepository {
         return jdbcTemplate.update(sql, media.getSignId(), media.getMediaType(), media.getMediaUrl(), media.isPrimary() ? 1 : 0);
     }
 
+    public int clearPrimaryBySignId(Long signId) {
+        String sql = "UPDATE sign_media SET is_primary = 0 WHERE sign_id = ?";
+        return jdbcTemplate.update(sql, signId);
+    }
+
     public int deleteBySignId(Long signId) {
         String sql = "DELETE FROM sign_media WHERE sign_id = ?";
         return jdbcTemplate.update(sql, signId);

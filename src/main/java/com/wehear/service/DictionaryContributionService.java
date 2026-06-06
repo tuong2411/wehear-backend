@@ -8,6 +8,8 @@ import com.wehear.repository.DictionaryContributionRepository;
 import com.wehear.repository.SignDictionaryRepository;
 import com.wehear.repository.SignMediaRepository;
 import com.wehear.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,8 @@ import java.util.List;
 
 @Service
 public class DictionaryContributionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(DictionaryContributionService.class);
 
     private final DictionaryContributionRepository contributionRepository;
     private final SignDictionaryRepository dictionaryRepository;
@@ -40,8 +44,11 @@ public class DictionaryContributionService {
     public Long createContribution(DictionaryContribution contribution) {
         String word = contribution.getWord() != null ? contribution.getWord().trim() : "";
         contribution.setWord(word);
+        contribution.setDescription(contribution.getDescription() != null ? contribution.getDescription().trim() : "");
+        contribution.setExample(contribution.getExample() != null ? contribution.getExample().trim() : "");
         
         System.out.println("Creating contribution: type=" + contribution.getType() + ", word='" + word + "', targetId=" + contribution.getTargetDictionaryId());
+        validateContribution(contribution);
 
         // Kiểm tra xem từ đã tồn tại trong từ điển chưa nếu loại là NEW
         if ("NEW".equals(contribution.getType())) {
@@ -51,6 +58,10 @@ public class DictionaryContributionService {
                 throw new RuntimeException("Từ '" + word + "' đã tồn tại trong từ điển. Vui lòng chọn 'Góp ý chỉnh sửa' thay vì thêm từ mới.");
             }
         } else if ("EDIT".equals(contribution.getType())) {
+            if (contribution.getTargetDictionaryId() != null
+                    && dictionaryRepository.findById(contribution.getTargetDictionaryId()) == null) {
+                throw new RuntimeException("Không tìm thấy từ điển cần chỉnh sửa.");
+            }
             if (contribution.getTargetDictionaryId() == null) {
                 throw new RuntimeException("Thiếu ID từ điển cần chỉnh sửa (targetDictionaryId).");
             }
@@ -65,6 +76,7 @@ public class DictionaryContributionService {
     }
 
     public String storeContributionVideo(org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        validateContributionVideo(file);
         return cloudinaryUtil.uploadByType(file, "dictionary");
     }
 
@@ -78,6 +90,34 @@ public class DictionaryContributionService {
 
     public DictionaryContribution getContributionById(Long id) {
         return contributionRepository.findById(id).orElse(null);
+    }
+
+    private void validateContribution(DictionaryContribution contribution) {
+        if (contribution.getWord() == null || contribution.getWord().isBlank()) {
+            throw new RuntimeException("Vui lòng nhập từ vựng.");
+        }
+        if (contribution.getDescription() == null || contribution.getDescription().isBlank()) {
+            throw new RuntimeException("Vui lòng nhập mô tả cách thực hiện.");
+        }
+        if (contribution.getVideoUrl() == null || contribution.getVideoUrl().isBlank()) {
+            throw new RuntimeException("Vui lòng tải lên video minh họa.");
+        }
+        if (contribution.getType() == null || contribution.getType().isBlank()) {
+            throw new RuntimeException("Vui lòng chọn loại đóng góp.");
+        }
+    }
+
+    private void validateContributionVideo(org.springframework.web.multipart.MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("Vui lòng chọn video minh họa.");
+        }
+        if (file.getSize() > 20 * 1024 * 1024) {
+            throw new RuntimeException("Video quá lớn. Vui lòng chọn file dưới 20MB.");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.toLowerCase().startsWith("video/")) {
+            throw new RuntimeException("File tải lên phải là video.");
+        }
     }
 
     @Transactional
@@ -130,10 +170,7 @@ public class DictionaryContributionService {
 
         // Add or Update Media
         if (contribution.getVideoUrl() != null && !contribution.getVideoUrl().isEmpty()) {
-            // Option: Invalidate old primary media if EDIT
-            if ("EDIT".equals(contribution.getType())) {
-                // You might want a method to clear existing media or just add as primary
-            }
+            mediaRepository.clearPrimaryBySignId(finalSignId);
 
             SignMedia media = new SignMedia();
             media.setSignId(finalSignId);
@@ -146,11 +183,7 @@ public class DictionaryContributionService {
 
         contributionRepository.updateStatus(id, "APPROVED", adminNote);
 
-        // Gửi email thông báo
-        userRepository.findById(contribution.getUserId()).ifPresent(user -> {
-            String html = emailService.getContributionApprovalTemplate(user.getFullName(), contribution.getWord());
-            emailService.sendHtmlEmail(user.getEmail(), "Đóng góp của bạn đã được duyệt - WeHear", html);
-        });
+        sendApprovalEmail(contribution);
     }
 
     public void rejectContribution(Long id, String adminNote) {
@@ -163,10 +196,28 @@ public class DictionaryContributionService {
 
         contributionRepository.updateStatus(id, "REJECTED", adminNote);
 
-        // Gửi email thông báo
-        userRepository.findById(contribution.getUserId()).ifPresent(user -> {
-            String html = emailService.getContributionRejectionTemplate(user.getFullName(), contribution.getWord(), adminNote);
-            emailService.sendHtmlEmail(user.getEmail(), "Cập nhật về đóng góp của bạn - WeHear", html);
-        });
+        sendRejectionEmail(contribution, adminNote);
+    }
+
+    private void sendApprovalEmail(DictionaryContribution contribution) {
+        try {
+            userRepository.findById(contribution.getUserId()).ifPresent(user -> {
+                String html = emailService.getContributionApprovalTemplate(user.getFullName(), contribution.getWord());
+                emailService.sendHtmlEmail(user.getEmail(), "Đóng góp của bạn đã được duyệt - WeHear", html);
+            });
+        } catch (Exception e) {
+            logger.warn("Failed to send approval email for contribution {}", contribution.getId(), e);
+        }
+    }
+
+    private void sendRejectionEmail(DictionaryContribution contribution, String adminNote) {
+        try {
+            userRepository.findById(contribution.getUserId()).ifPresent(user -> {
+                String html = emailService.getContributionRejectionTemplate(user.getFullName(), contribution.getWord(), adminNote);
+                emailService.sendHtmlEmail(user.getEmail(), "Cập nhật về đóng góp của bạn - WeHear", html);
+            });
+        } catch (Exception e) {
+            logger.warn("Failed to send rejection email for contribution {}", contribution.getId(), e);
+        }
     }
 }

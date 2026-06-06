@@ -69,6 +69,15 @@ public class UserRepository {
         jdbcTemplate.update(sql, userId);
     }
 
+    public void softDeleteById(Long userId, String encodedPassword) {
+        String deletedUsername = "deleted_user_" + userId;
+        String deletedEmail = "deleted_user_" + userId + "@deleted.wehear.local";
+        String sql = "UPDATE users SET username = ?, email = ?, password = ?, full_name = ?, " +
+                     "phone_number = NULL, avatar_url = NULL, status = 0, updated_at = CURRENT_TIMESTAMP " +
+                     "WHERE id = ?";
+        jdbcTemplate.update(sql, deletedUsername, deletedEmail, encodedPassword, "Người dùng đã xóa", userId);
+    }
+
     public void save(User user) {
         String sql = "INSERT INTO users (username, password, email, full_name, phone_number, role_id, status) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
