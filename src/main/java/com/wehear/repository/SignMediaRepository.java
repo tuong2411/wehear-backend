@@ -19,7 +19,7 @@ public class SignMediaRepository {
     }
 
     public List<SignMedia> findBySignId(Long signId) {
-        String sql = "SELECT * FROM sign_media WHERE sign_id = ?";
+        String sql = "SELECT * FROM sign_media WHERE sign_id = ? ORDER BY is_primary DESC, id DESC";
         return jdbcTemplate.query(sql, signMediaRowMapper, signId);
     }
 
@@ -28,7 +28,7 @@ public class SignMediaRepository {
             return List.of();
         }
         String inClause = String.join(",", signIds.stream().map(String::valueOf).toArray(String[]::new));
-        String sql = String.format("SELECT * FROM sign_media WHERE sign_id IN (%s)", inClause);
+        String sql = String.format("SELECT * FROM sign_media WHERE sign_id IN (%s) ORDER BY sign_id, is_primary DESC, id DESC", inClause);
         return jdbcTemplate.query(sql, signMediaRowMapper);
     }
 

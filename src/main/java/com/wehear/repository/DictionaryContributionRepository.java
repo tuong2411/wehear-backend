@@ -84,4 +84,18 @@ public class DictionaryContributionRepository {
         String sql = "UPDATE dictionary_contributions SET status = ?, admin_note = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         return jdbcTemplate.update(sql, status, adminNote, id);
     }
+
+    public int clearTargetDictionaryId(Long dictionaryId) {
+        String sql = "UPDATE dictionary_contributions SET target_dictionary_id = NULL WHERE target_dictionary_id = ?";
+        return jdbcTemplate.update(sql, dictionaryId);
+    }
+
+    public int clearTargetDictionaryIds(List<Long> dictionaryIds) {
+        if (dictionaryIds == null || dictionaryIds.isEmpty()) {
+            return 0;
+        }
+        String placeholders = String.join(",", java.util.Collections.nCopies(dictionaryIds.size(), "?"));
+        String sql = "UPDATE dictionary_contributions SET target_dictionary_id = NULL WHERE target_dictionary_id IN (" + placeholders + ")";
+        return jdbcTemplate.update(sql, dictionaryIds.toArray());
+    }
 }

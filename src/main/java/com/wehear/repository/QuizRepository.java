@@ -125,4 +125,18 @@ public class QuizRepository {
         String sql = "DELETE FROM quiz_questions WHERE quiz_id = ?";
         jdbcTemplate.update(sql, quizId);
     }
+
+    public int clearRelatedSignId(Long signId) {
+        String sql = "UPDATE quiz_questions SET related_sign_id = NULL WHERE related_sign_id = ?";
+        return jdbcTemplate.update(sql, signId);
+    }
+
+    public int clearRelatedSignIds(List<Long> signIds) {
+        if (signIds == null || signIds.isEmpty()) {
+            return 0;
+        }
+        String placeholders = String.join(",", java.util.Collections.nCopies(signIds.size(), "?"));
+        String sql = "UPDATE quiz_questions SET related_sign_id = NULL WHERE related_sign_id IN (" + placeholders + ")";
+        return jdbcTemplate.update(sql, signIds.toArray());
+    }
 }

@@ -2,6 +2,8 @@ package com.wehear.service;
 
 import com.wehear.model.SignDictionary;
 import com.wehear.model.SignMedia;
+import com.wehear.repository.DictionaryContributionRepository;
+import com.wehear.repository.QuizRepository;
 import com.wehear.repository.SignDictionaryRepository;
 import com.wehear.repository.SignMediaRepository;
 import org.springframework.stereotype.Service;
@@ -14,11 +16,19 @@ public class DictionaryService {
 
     private final SignDictionaryRepository signRepository;
     private final SignMediaRepository mediaRepository;
+    private final DictionaryContributionRepository contributionRepository;
+    private final QuizRepository quizRepository;
     private final com.wehear.util.CloudinaryUtil cloudinaryUtil;
 
-    public DictionaryService(SignDictionaryRepository signRepository, SignMediaRepository mediaRepository, com.wehear.util.CloudinaryUtil cloudinaryUtil) {
+    public DictionaryService(SignDictionaryRepository signRepository,
+                             SignMediaRepository mediaRepository,
+                             DictionaryContributionRepository contributionRepository,
+                             QuizRepository quizRepository,
+                             com.wehear.util.CloudinaryUtil cloudinaryUtil) {
         this.signRepository = signRepository;
         this.mediaRepository = mediaRepository;
+        this.contributionRepository = contributionRepository;
+        this.quizRepository = quizRepository;
         this.cloudinaryUtil = cloudinaryUtil;
     }
 
@@ -109,6 +119,8 @@ public class DictionaryService {
         if (ids == null || ids.isEmpty()) return;
         
         if ("delete".equals(action)) {
+            contributionRepository.clearTargetDictionaryIds(ids);
+            quizRepository.clearRelatedSignIds(ids);
             for (Long id : ids) {
                 mediaRepository.deleteBySignId(id);
             }
@@ -126,6 +138,8 @@ public class DictionaryService {
 
     @Transactional
     public boolean deleteSign(Long id) {
+        contributionRepository.clearTargetDictionaryId(id);
+        quizRepository.clearRelatedSignId(id);
         mediaRepository.deleteBySignId(id);
         return signRepository.deleteById(id) > 0;
     }

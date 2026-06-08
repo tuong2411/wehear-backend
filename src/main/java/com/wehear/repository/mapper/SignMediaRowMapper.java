@@ -14,7 +14,8 @@ public class SignMediaRowMapper implements RowMapper<SignMedia> {
         SignMedia media = new SignMedia();
         media.setId(rs.getLong("id"));
         media.setSignId(rs.getLong("sign_id"));
-        media.setMediaType(rs.getString("media_type"));
+        String mediaType = rs.getString("media_type");
+        media.setMediaType(mediaType != null ? mediaType.toLowerCase() : null);
         media.setMediaUrl(rs.getString("media_url"));
         media.setPrimary(rs.getInt("is_primary") == 1);
         media.setCreatedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
