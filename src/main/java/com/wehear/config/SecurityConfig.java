@@ -69,6 +69,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/tts", "/api/tts/**").permitAll()
                 .requestMatchers("/api/vsl-translation-corrections/training-data").hasRole("ADMIN")
                 .requestMatchers("/api/vsl-translation-corrections/**").authenticated()
+                .requestMatchers("/api/vsl-upload-videos/training-data").hasRole("ADMIN")
+                .requestMatchers("/api/vsl-upload-videos/**").authenticated()
                 .requestMatchers("/media/dataset/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/videos/**").permitAll()
