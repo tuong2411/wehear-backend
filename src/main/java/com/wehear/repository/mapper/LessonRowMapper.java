@@ -53,6 +53,11 @@ public class LessonRowMapper implements RowMapper<Lesson> {
         
         lesson.setCreatedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
         lesson.setUpdatedAt(rs.getTimestamp("updated_at") != null ? rs.getTimestamp("updated_at").toLocalDateTime() : null);
+        try {
+            lesson.setSignCount(rs.getInt("sign_count"));
+        } catch (SQLException ignored) {
+            lesson.setSignCount(null);
+        }
         
         return lesson;
     }

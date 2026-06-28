@@ -58,6 +58,7 @@ public class LessonService {
         if (lesson != null) {
             loadLessonSigns(lesson);
             loadLessonQuiz(lesson);
+            lesson.setSignCount(lesson.getSigns() != null ? lesson.getSigns().size() : 0);
         }
         return lesson;
     }
@@ -67,6 +68,7 @@ public class LessonService {
         if (lesson != null) {
             loadLessonSigns(lesson);
             loadLessonQuiz(lesson);
+            lesson.setSignCount(lesson.getSigns() != null ? lesson.getSigns().size() : 0);
         }
         return lesson;
     }

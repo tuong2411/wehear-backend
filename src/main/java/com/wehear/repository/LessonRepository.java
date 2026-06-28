@@ -23,12 +23,27 @@ public class LessonRepository {
     }
 
     public List<Lesson> findAll() {
-        String sql = "SELECT * FROM lessons ORDER BY id DESC";
+        String sql = "SELECT l.*, COALESCE(item_counts.sign_count, 0) AS sign_count " +
+                "FROM lessons l " +
+                "LEFT JOIN (" +
+                "  SELECT lesson_id, COUNT(*) AS sign_count " +
+                "  FROM lesson_items " +
+                "  GROUP BY lesson_id" +
+                ") item_counts ON item_counts.lesson_id = l.id " +
+                "ORDER BY l.id DESC";
         return jdbcTemplate.query(sql, lessonRowMapper);
     }
 
     public List<Lesson> findPublished() {
-        String sql = "SELECT * FROM lessons WHERE status = 'PUBLISHED' AND (publish_at IS NULL OR publish_at <= NOW()) ORDER BY id DESC";
+        String sql = "SELECT l.*, COALESCE(item_counts.sign_count, 0) AS sign_count " +
+                "FROM lessons l " +
+                "LEFT JOIN (" +
+                "  SELECT lesson_id, COUNT(*) AS sign_count " +
+                "  FROM lesson_items " +
+                "  GROUP BY lesson_id" +
+                ") item_counts ON item_counts.lesson_id = l.id " +
+                "WHERE l.status = 'PUBLISHED' AND (l.publish_at IS NULL OR l.publish_at <= NOW()) " +
+                "ORDER BY l.id DESC";
         return jdbcTemplate.query(sql, lessonRowMapper);
     }
 
@@ -99,5 +114,11 @@ public class LessonRepository {
     public List<Long> findSignIdsByLessonId(Long lessonId) {
         String sql = "SELECT sign_id FROM lesson_items WHERE lesson_id = ? ORDER BY display_order ASC";
         return jdbcTemplate.queryForList(sql, Long.class, lessonId);
+    }
+
+    public int countSignsByLessonId(Long lessonId) {
+        String sql = "SELECT COUNT(*) FROM lesson_items WHERE lesson_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, lessonId);
+        return count != null ? count : 0;
     }
 }

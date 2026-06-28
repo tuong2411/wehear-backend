@@ -19,6 +19,7 @@ public class Lesson {
     private Long createdBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Integer signCount;
 
     // Danh sách từ vựng trong bài học (chứa thông tin thứ tự từ lesson_items)
     private List<SignDictionary> signs;
@@ -57,6 +58,8 @@ public class Lesson {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public Integer getSignCount() { return signCount; }
+    public void setSignCount(Integer signCount) { this.signCount = signCount; }
     public List<SignDictionary> getSigns() { return signs; }
     public void setSigns(List<SignDictionary> signs) { this.signs = signs; }
     public Quiz getQuiz() { return quiz; }
