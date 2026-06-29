@@ -40,10 +40,7 @@ public class SignDictionaryRepository {
             params.add(search);
         }
 
-        if (region != null && !region.equals("all")) {
-            sql.append(" AND region LIKE CONCAT('%', ?, '%')");
-            params.add(region);
-        }
+        appendRegionFilter(sql, params, region);
 
         sql.append(" ORDER BY sign_word ASC LIMIT ? OFFSET ?");
         params.add(limit);
@@ -70,10 +67,7 @@ public class SignDictionaryRepository {
             params.add(search);
         }
 
-        if (region != null && !region.equals("all")) {
-            sql.append(" AND region LIKE CONCAT('%', ?, '%')");
-            params.add(region);
-        }
+        appendRegionFilter(sql, params, region);
 
         logger.info("Executing COUNT SQL: {} with params: {}", sql, params);
         Integer count = jdbcTemplate.queryForObject(sql.toString(), Integer.class, params.toArray());
@@ -140,5 +134,14 @@ public class SignDictionaryRepository {
         String sql = "DELETE FROM sign_dictionary WHERE id IN (" + 
                      String.join(",", java.util.Collections.nCopies(ids.size(), "?")) + ")";
         jdbcTemplate.update(sql, ids.toArray());
+    }
+
+    private void appendRegionFilter(StringBuilder sql, List<Object> params, String region) {
+        if (region == null || region.equals("all")) {
+            return;
+        }
+
+        sql.append(" AND (region LIKE CONCAT('%', ?, '%') OR region LIKE '%Toàn quốc%')");
+        params.add(region);
     }
 }
